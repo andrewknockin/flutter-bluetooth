@@ -10,11 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^0.1.2
+  flutter_blue: ^0.7.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_blue: ^0.5.0
   scoped_model: ^1.0.1
 
 flutter:

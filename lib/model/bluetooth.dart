@@ -42,14 +42,8 @@ class Bluetooth extends Model {
   int battery;
 
   void init() {
-    // Immediately get the state of FlutterBlue
-    _flutterBlue.state.then((s) {
-      state = s;
-      print('State init: $state');
-      notifyListeners();
-    });
     // Subscribe to state changes
-    _stateSubscription = _flutterBlue.onStateChanged().listen((s) {
+    _stateSubscription = _flutterBlue.state.listen((s) {
       state = s;
       print('State updated: $state');
       notifyListeners();
@@ -70,9 +64,9 @@ class Bluetooth extends Model {
     _scanSubscription = _flutterBlue
         .scan(timeout: const Duration(seconds: 5),)
         .listen((scanResult) {
-        if(scanResult.advertisementData.localName.startsWith('HX-')) {
-          scanResults[scanResult.device.id] = scanResult;
-          notifyListeners();
+      if(scanResult.advertisementData.localName.startsWith('HX-')) {
+        scanResults[scanResult.device.id] = scanResult;
+        notifyListeners();
       }
     }, onDone: stopScan);
 
@@ -91,21 +85,18 @@ class Bluetooth extends Model {
     device = d;
     print('Connecting device ' + d.name);
     // Connect to device
+    await device.connect(timeout: const Duration(seconds: 4));
+/*
     deviceConnection = _flutterBlue
         .connect(device, timeout: const Duration(seconds: 4))
         .listen(
       null,
       onDone: disconnect,
-    );
-
-    // Update the connection state immediately
-    device.state.then((s) {
-        deviceState = s;
-        notifyListeners();
-    });
+      );
+*/
 
     // Subscribe to connection changes
-    deviceStateSubscription = device.onStateChanged().listen((s) {
+    deviceStateSubscription = device.state.listen((s) {
       deviceState = s;
       notifyListeners();
       if (s == BluetoothDeviceState.connected) {
@@ -151,10 +142,10 @@ class Bluetooth extends Model {
 
   _setNotification(BluetoothCharacteristic characteristic) async {
     if (characteristic != null) {
-      await device.setNotifyValue(characteristic, true);
+      await characteristic.setNotifyValue(true);
       // ignore: cancel_subscriptions
-      final sub = device.onValueChanged(characteristic).listen((d) {
-        _onValuesChanged(characteristic);
+      final sub = characteristic.value.listen((value) {
+        _onValuesChanged(characteristic, value);
         notifyListeners();
       });
       // Add to map
@@ -163,17 +154,14 @@ class Bluetooth extends Model {
     }
   }
 
-  _onValuesChanged(BluetoothCharacteristic characteristic) {
-    List<int> data = characteristic.value;
-    String uuid = characteristic.uuid.toString();
-    print('onValuesChanged ' + characteristic.value.toString() + " " + uuid);
+  _onValuesChanged(BluetoothCharacteristic characteristic, List<int> data) {
 
-    if (uuid == heartRateMeasurementUUID) {
+    if (characteristic.uuid == heartRateMeasurementUUID) {
       heartRate = data[1];
-    } else if (uuid == respirationRateMeasurementUUID) {
+    } else if (characteristic.uuid == respirationRateMeasurementUUID) {
       respirationRate = data[1];
 
-    } else if (uuid == accelerometerMeasurementUUID) {
+    } else if (characteristic.uuid == accelerometerMeasurementUUID) {
       int flag = data[0];
       int dataIndex = 1;
 
@@ -194,7 +182,7 @@ class Bluetooth extends Model {
         cadence = data[dataIndex];
       }
 
-    } else if (uuid == batteryMeasurementUUID) {
+    } else if (characteristic.uuid == batteryMeasurementUUID) {
       battery = data[0];
     }
   }
