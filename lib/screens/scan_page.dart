@@ -86,7 +86,7 @@ class ScanPage extends StatelessWidget {
         children: <Widget>[
           _buildScanButton(model),
           SizedBox(height: 20),
-          new Text("Press the bouton to scan", style: TextStyle(fontSize: 13.0,fontWeight: FontWeight.bold)),
+          new Text("Press the button to scan", style: TextStyle(fontSize: 13.0,fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -104,7 +104,7 @@ class ScanPage extends StatelessWidget {
     );
   }
 
-  void startBluetooth(Bluetooth model) {
+  Future<void> startBluetooth(Bluetooth model) async {
     if (!model.isConnected && model.state != BluetoothState.on) {
       model.init();
     }

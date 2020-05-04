@@ -156,12 +156,12 @@ class Bluetooth extends Model {
 
   _onValuesChanged(BluetoothCharacteristic characteristic, List<int> data) {
 
-    if (characteristic.uuid == heartRateMeasurementUUID) {
+    if (characteristic.uuid.toString() == heartRateMeasurementUUID) {
       heartRate = data[1];
-    } else if (characteristic.uuid == respirationRateMeasurementUUID) {
+    } else if (characteristic.uuid.toString() == respirationRateMeasurementUUID) {
       respirationRate = data[1];
 
-    } else if (characteristic.uuid == accelerometerMeasurementUUID) {
+    } else if (characteristic.uuid.toString() == accelerometerMeasurementUUID) {
       int flag = data[0];
       int dataIndex = 1;
 
@@ -182,7 +182,7 @@ class Bluetooth extends Model {
         cadence = data[dataIndex];
       }
 
-    } else if (characteristic.uuid == batteryMeasurementUUID) {
+    } else if (characteristic.uuid.toString() == batteryMeasurementUUID) {
       battery = data[0];
     }
   }
